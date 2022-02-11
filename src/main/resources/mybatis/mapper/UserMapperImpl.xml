@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.meitalk.auth.mapper.UserMapper">
+
+    <insert id="insertUserJoin"
+            parameterType="com.meitalk.auth.model.user.UserJoinDto"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_profile(mail_id, user_name, user_pw, country_phone, phone_num, ip_addr, create_time, update_time, role, platform, privacy_agree, user_picture, oauth2_key, google_oauth2_key, facebook_oauth2_key, apple_oauth2_key,email_verification)
+        VALUES(#{mailId}, #{userName}, #{userPw}, #{countryPhone}, #{phoneNum}, #{ipAddr}, NOW(), NOW(), 'USER', #{platform}, #{privacyAgree}, #{userPicture}, #{oauth2Key}, #{googleOauth2Key}, #{facebookOauth2Key}, #{appleOauth2Key}, #{emailVerification})
+    </insert>
+
+    <select id="selectUserByEmail"
+            parameterType="java.lang.String"
+            resultType="com.meitalk.auth.model.user.CustomUserDetails">
+        SELECT profile.id AS userId,
+        mail_id AS mailId,
+        user_name AS userName,
+        user_pw AS userPw,
+        country_phone AS countryPhone,
+        phone_num AS phoneNum,
+        ip_addr AS ipAddr,
+        profile.create_time AS createTime,
+        profile.update_time AS updateTime,
+        role,
+        block,
+        platform,
+        privacy_agree AS privacyAgree,
+        user_picture AS userPicture,
+        oauth2_key AS oauth2Key,
+        google_oauth2_key AS googleOauth2Key,
+        facebook_oauth2_key AS facebookOauth2Key,
+        apple_oauth2_key AS appleOauth2Key,
+        email_verification AS emailVerification,
+        channel.id          AS channelId
+        FROM user_profile AS profile
+        INNER JOIN my_channel AS channel ON profile.id = channel.user_no
+        WHERE mail_id = #{mailId}
+        AND delete_time IS NULL
+    </select>
+
+    <select id="selectUserByOauth2Key"
+            parameterType="java.lang.String"
+            resultType="com.meitalk.auth.model.user.CustomUserDetails">
+        SELECT profile.id AS userId,
+        mail_id AS mailId,
+        user_name AS userName,
+        user_pw AS userPw,
+        country_phone AS countryPhone,
+        phone_num AS phoneNum,
+        ip_addr AS ipAddr,
+        profile.create_time AS createTime,
+        profile.update_time AS updateTime,
+        role,
+        block,
+        platform,
+        privacy_agree AS privacyAgree,
+        user_picture AS userPicture,
+        oauth2_key AS oauth2Key,
+        google_oauth2_key AS googleOauth2Key,
+        facebook_oauth2_key AS facebookOauth2Key,
+        apple_oauth2_key AS appleOauth2Key,
+        email_verification AS emailVerification,
+        channel.id          AS channelId
+        FROM user_profile AS profile
+        INNER JOIN my_channel AS channel ON profile.id = channel.user_no
+        WHERE oauth2_key = #{oauth2Key}
+        AND delete_time IS NULL
+    </select>
+
+    <update id="updateGoogleOauth2Key"
+            parameterType="java.lang.String">
+        UPDATE user_profile
+        SET google_oauth2_key = #{sub},
+        oauth2_key = #{sub}
+        WHERE mail_id = #{userEmail}
+    </update>
+
+    <update id="updateFacebookOauth2Key"
+            parameterType="java.lang.String">
+        UPDATE user_profile
+        SET facebook_oauth2_key = #{id},
+        oauth2_key = #{id}
+        WHERE mail_id = #{userEmail}
+    </update>
+
+    <update id="updateAppleOauth2Key"
+            parameterType="java.lang.String">
+        UPDATE user_profile
+        SET apple_oauth2_key = #{sub},
+        oauth2_key = #{sub}
+        WHERE mail_id = #{userEmail}
+    </update>
+
+    <select id="selectEmailVerificationByUserNoByFlag"
+            parameterType="java.lang.String"
+            resultType="com.meitalk.auth.model.user.ResEmailVerification">
+        SELECT id,
+        user_no AS userNo,
+        user_key AS userKey,
+        verification,
+        create_time AS createTime
+        FROM email_verification
+        WHERE user_no = #{userNo}
+        ORDER BY id DESC LIMIT 1
+    </select>
+
+    <update id="updateRole">
+        update user_profile
+        SET role = #{role}
+        WHERE mail_id = #{userMail}
+    </update>
+</mapper>
+
